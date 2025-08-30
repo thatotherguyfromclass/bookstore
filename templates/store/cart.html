@@ -1,0 +1,142 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Your Cart - AI Pages</title>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: var(--background, #f8fafc);
+      color: var(--text, #1e293b);
+    }
+    header {
+      background: var(--header, #0ea5a4);
+      padding: 14px 20px;
+    }
+    header a.back-link {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 15px;
+    }
+    main {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 18px;
+    }
+    h2 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    /* Cart table */
+    .cart-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card, #fff);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .cart-table th,
+    .cart-table td {
+      padding: 14px 16px;
+      text-align: left;
+    }
+    .cart-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      font-size: 15px;
+      color: #475569;
+    }
+    .cart-table td {
+      border-top: 1px solid #e2e8f0;
+      font-size: 15px;
+    }
+    .cart-title {
+      font-weight: 500;
+    }
+    .cart-price {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .btn-primary {
+      background: ##0ea5a4;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #0b8b88;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+    }
+    .btn-outline:hover {
+      background: #f1f5f9;
+    }
+
+    /* Footer row */
+    .cart-footer {
+      text-align: right;
+      padding: 18px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+    }
+    .cart-total {
+      font-size: 18px;
+      font-weight: 600;
+      margin-right: 20px;
+    }
+
+    /* Empty cart */
+    .cart-empty {
+      text-align: center;
+      padding: 40px 20px;
+      background: var(--card, #fff);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      font-size: 16px;
+      color: #475569;
+    }
+
+    /* Responsive */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="{% url 'catalog' %}" class="back-link">← Back to Home</a>
+  </header>
+
+  <main>
+    <h2>Your Cart</h2>
+    <div id="cart-root">
+      <!-- JS will render the cart table here -->
+    </div>
+  </main>
+
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

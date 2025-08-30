@@ -1,0 +1,80 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thank You - AI Pages</title>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #0f172a; /* dark navy */
+      color: #f1f5f9; /* light text */
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: #1e293b; /* darker slate */
+      padding: 1rem;
+      text-align: center;
+    }
+    header h1 a {
+      color: #fff;
+      text-decoration: none;
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+    main {
+      flex: 1;
+      max-width: 600px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: #1e293b;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #38bdf8; /* accent blue */
+    }
+    p {
+      margin: 0.8rem 0;
+      line-height: 1.6;
+    }
+    strong {
+      color: #38bdf8;
+    }
+    a.button {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #38bdf8;
+      color: #0f172a;
+      font-weight: 600;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+    a.button:hover {
+      background: #0ea5e9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><a href="{% url 'catalog' %}">Bookstore</a></h1>
+  </header>
+
+  <main>
+    <h2>Thank you! 🎉</h2>
+    <p>Your payment for order <strong>{{ order.reference }}</strong> has been received.</p>
+    <p>An email has been sent to <strong>{{ order.email }}</strong> with your download link(s). Please check your inbox (and spam folder if you don’t see it).</p>
+    <a href="{% url 'catalog' %}" class="button">Back to Catalog</a>
+  </main>
+</body>
+</html>

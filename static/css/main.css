@@ -1,0 +1,239 @@
+/* static/css/main.css
+   Minimal, modern bookstore styles.
+*/
+
+/* Basic resets */
+:root{
+  --bg:#f7f8fb;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --accent:#0ea5a4; /* teal-ish */
+  --accent-dark:#0b8b88;
+  --text:#111827;
+  --shadow: 0 6px 20px rgba(15,23,42,0.06);
+  --radius: 12px;
+  --container: 1100px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  color:var(--text);
+  background:linear-gradient(180deg, var(--bg) 0%, #ffffff 100%);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+  padding-bottom:60px;
+}
+
+/* container */
+.container{
+  width:94%;
+  max-width:var(--container);
+  margin:28px auto;
+}
+
+/* Header */
+.site-header{
+  position:sticky;
+  top:0;
+  background:rgba(255,255,255,0.95);
+  backdrop-filter: blur(4px);
+  border-bottom:1px solid rgba(15,23,42,0.04);
+  z-index:40;
+}
+.header-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 4%;
+  max-width:var(--container);
+  margin:0 auto;
+}
+.brand{
+  font-weight:700;
+  color:var(--text);
+  text-decoration:none;
+  font-size:20px;
+  letter-spacing:0.2px;
+}
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.search-input{
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid rgba(15,23,42,0.06);
+  width:280px;
+  outline:none;
+  background:white;
+  box-shadow:var(--shadow);
+}
+.cart-link{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
+  color:var(--text);
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(15,23,42,0.04);
+  background:white;
+}
+.cart-badge{
+  display:inline-block;
+  min-width:20px;
+  height:20px;
+  line-height:18px;
+  font-size:12px;
+  border-radius:999px;
+  background:var(--accent);
+  color:white;
+  text-align:center;
+  padding:0 6px;
+}
+
+/* Intro */
+.intro{margin:18px 0 8px}
+.intro h1{margin:0 0 6px;font-size:28px}
+.muted{color:var(--muted);font-size:14px}
+.small{font-size:13px}
+
+/* Grid */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+  gap:18px;
+  margin-top:18px;
+}
+
+/* Card */
+.card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  transition:transform .18s ease, box-shadow .18s ease;
+  border:1px solid rgba(15,23,42,0.03);
+}
+.card:focus,
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 10px 30px rgba(15,23,42,0.09);
+}
+.cover-wrap{
+  height:220px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg, #ffffff 0%, #fbfdfe 100%);
+}
+.cover{
+  max-width:100%;
+  max-height:100%;
+  display:block;
+  object-fit:cover;
+}
+.cover.placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#f3f4f6,#eef2f6);
+  color:var(--muted);
+  font-weight:600;
+}
+.placeholder-text{opacity:.6}
+
+.card-body{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  flex:1;
+}
+.title{
+  font-size:16px;
+  margin:0;
+  line-height:1.25;
+}
+.author{margin:0;color:var(--muted);font-size:13px}
+.price{font-weight:700;margin:0;color:var(--accent-dark)}
+.card-actions{
+  margin-top:auto;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-start;
+}
+.btn{
+  border:0;
+  padding:8px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+}
+.btn-outline{
+  background:transparent;
+  border:1px solid rgba(15,23,42,0.06);
+  color:var(--text);
+}
+.btn-primary{
+  background:var(--accent);
+  color:white;
+  border:1px solid rgba(0,0,0,0.03);
+}
+.btn-primary:hover{background:var(--accent-dark)}
+
+/* Modal */
+#product-modal .modal-content{
+  border-radius:12px;
+  box-shadow: 0 20px 50px rgba(2,6,23,0.20);
+  border:none;
+}
+#product-modal .modal-body{ padding:1.25rem; }
+#product-modal .modal-cover img{ width:100%; height:100%; object-fit:cover; border-radius:8px; }
+#product-modal .modal-info { display:flex; flex-direction:column; gap:.5rem; }
+#product-modal .btn-close { margin-top:-6px; }
+
+
+/* Responsive adjustments */
+@media (max-width:768px){
+  .header-inner{padding:10px 6%}
+  .search-input{display:none}
+  .grid{grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));gap:12px}
+  .cover-wrap{height:160px}
+  .modal-content{flex-direction:column}
+  .modal-cover, .modal-info{width:100%}
+}
+
+
+/* tiny helpers to work with Bootstrap */
+.bg-teal{ background-color: #0ea5a4 !important; } /* match previous accent */
+.badge.text-white{ color: #fff !important; }
+
+/* make the cover use full card width/height and crop nicely */
+.cover-wrap{ height:260px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(180deg,#fff,#fbfdfe); border-bottom:1px solid rgba(0,0,0,0.03); }
+.cover{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* reduce big shadows from older styles that might clash with Bootstrap */
+.card{ box-shadow: 0 6px 18px rgba(15,23,42,0.06); border-radius:10px; border:1px solid rgba(0,0,0,0.03); }
+.card-body .title{ font-size:1rem; }
+
+/* ensure modal covers overlay sits above Bootstrap layers */
+.modal{ z-index:2000; }
+.modal-panel{ max-width:920px; }
+
+/* small responsive tweak */
+@media (max-width:576px){
+  .cover-wrap{ height:180px; }
+}

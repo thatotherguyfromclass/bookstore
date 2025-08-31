@@ -39,10 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'store',
     'cloudinary',
     'cloudinary_storage',
+    'django.contrib.staticfiles',
+    'store',
 ]
 
 MIDDLEWARE = [
@@ -141,5 +141,9 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
-CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME":os.getenv("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY":os.getenv("CLOUDINARY_API_KEY"),
+    "API_SECRET":os.getenv("CLOUDINARY_API_SECRET")
+}
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'

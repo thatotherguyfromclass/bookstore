@@ -2,6 +2,7 @@
 from django.db import models
 from django.utils import timezone
 import uuid
+from cloudinary.models import CloudinaryField
 
 def generate_order_reference():
     return f"BOOK-{uuid.uuid4().hex[:12].upper()}"
@@ -10,7 +11,7 @@ class Book(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
     price_kobo = models.PositiveIntegerField(help_text="Price in kobo (NGN * 100)")
-    cover = models.ImageField(upload_to="covers/", blank=True, null=True)
+    cover = CloudinaryField("image", blank=True, null=True)
     link_url = models.URLField(max_length=1000, help_text="External URL to the book", blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

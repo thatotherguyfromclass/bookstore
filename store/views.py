@@ -96,7 +96,6 @@ from django.conf import settings
 from django.utils import timezone
 import requests
 from .models import Order
-from .views import send_order_links_email  # ensure this points to your email function
 
 def verify_payment(request):
     """

@@ -90,11 +90,19 @@ from .models import Order
 # from .utils import send_order_links_email  # wherever you defined it
 
 
+from django.shortcuts import redirect, get_object_or_404
+from django.contrib import messages
+from django.conf import settings
+from django.utils import timezone
+import requests
+from .models import Order
+from .views import send_order_links_email  # ensure this points to your email function
+
 def verify_payment(request):
     """
     GET /api/payments/verify/?ref=<reference>
     Verifies Paystack transaction and fulfills order.
-    Redirects to catalog with error messages if anything fails.
+    Redirects to thank-you page on success or catalog on failure.
     """
     ref = request.GET.get("ref")
     if not ref:
@@ -106,17 +114,16 @@ def verify_payment(request):
         messages.error(request, "Payment gateway not configured. Contact support.")
         return redirect("catalog")
 
-    # Call Paystack verify
+    # Verify transaction with Paystack
     headers = {"Authorization": f"Bearer {secret}"}
     verify_url = f"https://api.paystack.co/transaction/verify/{ref}"
     try:
         r = requests.get(verify_url, headers=headers, timeout=15)
         resp = r.json()
-    except Exception as e:
+    except Exception:
         messages.error(request, "Error contacting payment gateway. Please try again.")
         return redirect("catalog")
 
-    # Paystack returns status:false for failures
     if not resp.get("status"):
         messages.error(request, "Payment verification failed. Please try again.")
         return redirect("catalog")
@@ -136,27 +143,26 @@ def verify_payment(request):
             return redirect("catalog")
 
     if status == "success":
-        # Mark paid
-        order.status = Order.STATUS_PAID
-        order.paid_at = timezone.now()
-        order.paystack_ref = gateway_ref
-        order.save()
+        # Only mark as PAID once
+        if order.status != Order.STATUS_PAID:
+            order.status = Order.STATUS_PAID
+            order.paid_at = timezone.now()
+            order.paystack_ref = gateway_ref
+            order.save()
 
-        # Send email with book links
-        try:
-            send_order_links_email(order)
-        except Exception as e:
-            # Don’t fail payment, just warn in logs
-            print(f"⚠️ Email sending failed: {e}")
+            # Send email once
+            try:
+                send_order_links_email(order)
+            except Exception as e:
+                print(f"⚠️ Email sending failed: {e}")
 
-        # Return JSON for frontend (keeps your working success flow)
-        return JsonResponse({"status": "success"})
+        # Redirect to thank-you page
+        return redirect('thank_you', reference=order.reference)
     else:
         order.status = Order.STATUS_FAILED
         order.save()
         messages.error(request, "Payment was not successful. Please try again.")
         return redirect("catalog")
-
 
 # helper to send email with book links
 from django.core.mail import EmailMessage

@@ -209,11 +209,11 @@
           ref: reference,
           callback: function (response) {
             // Redirect to server-side verification page
-            window.location.href = `/verify-payment/?ref=${encodeURIComponent(response.reference)}`;
+            window.location.href = `/api/payments/verify/?ref=${encodeURIComponent(response.reference)}`
           },
           onClose: function () {
             // Redirect to server-side verification if user closes popup
-            window.location.href = `/verify-payment/?ref=${encodeURIComponent(reference)}`;
+            window.location.href = `/api/payments/verify/?ref=${encodeURIComponent(reference)}`
           }
         });
         handler.openIframe();

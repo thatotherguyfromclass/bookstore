@@ -194,7 +194,7 @@ def send_order_links_email(order):
                 f"<img src='{img_url}' alt='{book.title}' style='width:100%;height:auto;margin-bottom:5px;border-radius:4px;'>"
             )
         html_lines.append(f"<strong>{book.title}</strong><br>")
-        html_lines.append(f"<a href='{book.link_url}' style='color:#0b8b88;text-decoration:none;'>Download / View</a>")
+        html_lines.append(f"<a href='{book.link_url}' style='color:#0b8b88;text-decoration:none;'>Read</a>")
         html_lines.append("</div>")
 
     html_lines.append("</div>")

@@ -69,6 +69,15 @@
       box-shadow: 0 0 0 2px rgba(11,139,136,0.2);
     }
 
+    #checkout-instruction {
+      background: #f3fdfd;
+      border-left: 4px solid #0b8b88;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
     #checkout-summary {
       background: #f3fdfd;
       border: 1px solid #0b8b88;
@@ -106,6 +115,13 @@
       background: #096e6b;
     }
 
+    #cancel-payment {
+      background: #d9534f;
+    }
+    #cancel-payment:hover {
+      background: #c9302c;
+    }
+
     /* Mobile responsiveness */
     @media (max-width: 600px) {
       main {
@@ -123,6 +139,11 @@
 
   <main>
     <h2>Checkout</h2>
+
+    <div id="checkout-instruction">
+      Please do not close or reload this page while your payment is processing.
+    </div>
+
     <form id="checkout-form" method="post">
       {% csrf_token %}
       <label>
@@ -141,6 +162,7 @@
       <p id="checkout-summary">Loading cart summary...</p>
       <p id="checkout-message"></p>
       <button type="button" id="check-status" style="display:none;">Check Payment Status</button>
+      <button type="button" id="cancel-payment" style="display:none;">Cancel Payment</button>
       <button type="submit" id="pay-now">Pay now</button>
     </form>
   </main>
@@ -160,6 +182,7 @@
       const checkoutMessage = document.getElementById('checkout-message');
       const payNowBtn = document.getElementById('pay-now');
       const checkStatusBtn = document.getElementById('check-status');
+      const cancelBtn = document.getElementById('cancel-payment');
 
       function renderCheckoutSummary() {
         const cart = getCart();
@@ -173,6 +196,15 @@
       }
 
       renderCheckoutSummary();
+
+      // Show buttons if there is a pending reference
+      const previousRef = localStorage.getItem('last_order_reference');
+      if (previousRef) {
+        checkoutMessage.style.display = 'block';
+        checkoutMessage.textContent = 'You have a pending payment. Click the button below to check status or cancel.';
+        checkStatusBtn.style.display = 'block';
+        cancelBtn.style.display = 'block';
+      }
 
       // Submit handler
       document.getElementById('checkout-form').addEventListener('submit', async function (e) {
@@ -222,12 +254,14 @@
             ref: reference,
             callback: function (response) {
               // Successful → verify
+              localStorage.removeItem('last_order_reference');
               window.location.href = `/api/payments/verify/?ref=${encodeURIComponent(response.reference)}`;
             },
             onClose: function () {
               checkoutMessage.style.display = 'block';
-              checkoutMessage.textContent = 'Payment may still be processing. Click the button below to check status.';
+              checkoutMessage.textContent = 'Payment may still be processing. Click the button below to check status or cancel.';
               checkStatusBtn.style.display = 'block';
+              cancelBtn.style.display = 'block';
             }
           });
 
@@ -247,6 +281,19 @@
         if (!reference) return alert('No order reference found.');
         window.location.href = `/api/payments/verify/?ref=${encodeURIComponent(reference)}`;
       });
+
+      // Cancel Payment button
+      cancelBtn.addEventListener('click', function () {
+        if (confirm("Are you sure you want to cancel this payment?")) {
+          localStorage.removeItem('last_order_reference');
+          checkoutMessage.style.display = 'none';
+          checkStatusBtn.style.display = 'none';
+          cancelBtn.style.display = 'none';
+          alert("Payment canceled. You can now return to the catalog.");
+          window.location.href = "{% url 'catalog' %}";
+        }
+      });
+
     });
   </script>
 </body>

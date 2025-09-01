@@ -138,110 +138,94 @@
   <script src="{% static 'js/main.js' %}"></script>
   <script src="https://js.paystack.co/v1/inline.js"></script>
   <script>
-    // helper to get CSRF token from cookie
-    function getCookie(name) {
-      const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-      return v ? v.pop() : '';
-    }
+  // helper to get CSRF token from cookie
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+  }
 
-    // prepare checkout summary from cart
-    function renderCheckoutSummary() {
-      const cart = getCart();
-      if (!cart || cart.length === 0) {
-        document.getElementById('checkout-summary').textContent = 'Your cart is empty.';
-        document.getElementById('pay-now').disabled = true;
+  // prepare checkout summary from cart
+  function renderCheckoutSummary() {
+    const cart = getCart();
+    if (!cart || cart.length === 0) {
+      document.getElementById('checkout-summary').textContent = 'Your cart is empty.';
+      document.getElementById('pay-now').disabled = true;
+      return;
+    }
+    const lines = cart.map(i => `${i.title} x${i.qty} — ₦${formatNGNFromKobo(i.price_kobo * i.qty)}`);
+    document.getElementById('checkout-summary').innerHTML = `<strong>Order:</strong><br>${lines.join('<br>')}<br><strong>Total:</strong> ₦${formatNGNFromKobo(cart.reduce((s,i)=>s + i.price_kobo * i.qty,0))}`;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    renderCartBadge();
+    renderCheckoutSummary();
+
+    document.getElementById('checkout-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const name = document.getElementById('buyer-name').value.trim();
+      const email = document.getElementById('buyer-email').value.trim();
+      const phone = document.getElementById('buyer-phone').value.trim();
+      const items = getCart().map(i => ({ book_id: i.id, qty: i.qty }));
+
+      if (!name || !email || items.length === 0) {
+        alert('Please provide name, email, and have items in your cart.');
         return;
       }
-      const lines = cart.map(i => `${i.title} x${i.qty} — ₦${formatNGNFromKobo(i.price_kobo * i.qty)}`);
-      document.getElementById('checkout-summary').innerHTML = `<strong>Order:</strong><br>${lines.join('<br>')}<br><strong>Total:</strong> ₦${formatNGNFromKobo(cart.reduce((s,i)=>s + i.price_kobo * i.qty,0))}`;
-    }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      renderCartBadge();
-      renderCheckoutSummary();
+      document.getElementById('pay-now').disabled = true;
+      document.getElementById('pay-now').textContent = 'Processing...';
 
-      document.getElementById('checkout-form').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const name = document.getElementById('buyer-name').value.trim();
-        const email = document.getElementById('buyer-email').value.trim();
-        const phone = document.getElementById('buyer-phone').value.trim();
-        const items = getCart().map(i => ({ book_id: i.id, qty: i.qty }));
+      try {
+        const res = await fetch("{% url 'create_order' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie('csrftoken')
+          },
+          body: JSON.stringify({ name, email, phone, items })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not create order');
 
-        if (!name || !email || items.length === 0) {
-          alert('Please provide name, email, and have items in your cart.');
-          return;
-        }
+        // store order ref locally (optional)
+        localStorage.setItem('last_order_reference', data.reference);
 
-        document.getElementById('pay-now').disabled = true;
-        document.getElementById('pay-now').textContent = 'Processing...';
-
-        try {
-          const res = await fetch("{% url 'create_order' %}", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": getCookie('csrftoken')
-            },
-            body: JSON.stringify({ name, email, phone, items })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Could not create order');
-
-          // store order ref locally (optional)
-          localStorage.setItem('last_order_reference', data.reference);
-
-          // start Paystack
+        // start Paystack
         const pk = data.paystack_public_key;
         const emailToUse = data.email;
         const amount = data.amount_kobo; // in kobo
         const reference = data.reference;
 
         if (!pk) {
-        alert('Paystack public key not configured. Order created, but cannot start payment.');
-        window.location.href = '/thank-you/' + reference + '/';
-        return;
+          alert('Paystack public key not configured. Order created, but cannot start payment.');
+          window.location.href = '/thank-you/' + reference + '/';
+          return;
         }
 
         const handler = PaystackPop.setup({
-        key: pk,
-        email: emailToUse,
-        amount: amount,
-        ref: reference,
-        callback: function (response) {
-            // response.reference
-            // Verify on server
-            fetch(`/api/payments/verify/?ref=${encodeURIComponent(response.reference)}`)
-            .then(r => r.json())
-            .then(result => {
-                if (result.status === 'success') {
-                // clear cart
-                localStorage.removeItem('bookstore_cart_v1');
-                // redirect to thank-you
-                window.location.href = `/thank-you/${reference}/`;
-                } else {
-                alert('Payment could not be verified. We will contact you.');
-                // optionally redirect or show message
-                }
-            })
-            .catch(err => {
-                console.error('verify error', err);
-                alert('Error verifying payment. Contact support.');
-            });
-        },
-        onClose: function () {
-            alert('Payment window closed. If you completed payment, contact support with your order reference.');
-        }
+          key: pk,
+          email: emailToUse,
+          amount: amount,
+          ref: reference,
+          callback: function (response) {
+            // Redirect to server-side verification page
+            window.location.href = `/verify-payment/?ref=${encodeURIComponent(response.reference)}`;
+          },
+          onClose: function () {
+            // Redirect to server-side verification if user closes popup
+            window.location.href = `/verify-payment/?ref=${encodeURIComponent(reference)}`;
+          }
         });
         handler.openIframe();
 
-        } catch (err) {
-          console.error(err);
-          alert('Error creating order: ' + err.message);
-          document.getElementById('pay-now').disabled = false;
-          document.getElementById('pay-now').textContent = 'Pay now';
-        }
-      });
+      } catch (err) {
+        console.error(err);
+        alert('Error creating order: ' + err.message);
+        document.getElementById('pay-now').disabled = false;
+        document.getElementById('pay-now').textContent = 'Pay now';
+      }
     });
-  </script>
+  });
+</script>
 </body>
 </html>

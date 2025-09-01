@@ -159,36 +159,53 @@ def verify_payment(request):
 
 
 # helper to send email with book links
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.conf import settings
 
 def send_order_links_email(order):
     """
-    Compose and send an email to the buyer with the book link(s).
+    Send an HTML email to the buyer with each book's cover image, title, and link.
     """
     subject = f"Your purchase — Order {order.reference}"
-    lines = [
-        f"Hi {order.name},",
-        "",
-        "Thanks for your purchase. Below are the link(s) to the book(s) you bought:",
-        ""
-    ]
-    for item in order.items.all():
-        lines.append(f"- {item.book.title} : {item.book.link_url}")
-
-    lines.append("")
-    lines.append("If a link doesn't work, reply to this email and we'll assist.")
-    body = "\n".join(lines)
-
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+    recipient_list = [order.email]
 
-    send_mail(
+    # Start HTML content
+    html_lines = [
+        f"<p>Hi {order.name},</p>",
+        "<p>Thanks for your purchase. Here are the book(s) you bought:</p>",
+        "<div style='display:flex;flex-wrap:wrap;'>"
+    ]
+
+    for item in order.items.all():
+        book = item.book
+        img_url = book.cover.url if book.cover else ''
+        # each book in a small card
+        html_lines.append(
+            f"<div style='width:150px;margin:10px;text-align:center;border:1px solid #ddd;border-radius:8px;padding:8px;'>"
+        )
+        if img_url:
+            html_lines.append(
+                f"<img src='{img_url}' alt='{book.title}' style='width:100%;height:auto;margin-bottom:5px;border-radius:4px;'>"
+            )
+        html_lines.append(f"<strong>{book.title}</strong><br>")
+        html_lines.append(f"<a href='{book.link_url}' style='color:#0b8b88;text-decoration:none;'>Download / View</a>")
+        html_lines.append("</div>")
+
+    html_lines.append("</div>")
+    html_lines.append("<p>If a link doesn't work, reply to this email and we'll assist.</p>")
+
+    html_content = "\n".join(html_lines)
+
+    # Send HTML email
+    email = EmailMessage(
         subject=subject,
-        message=body,
+        body=html_content,
         from_email=from_email,
-        recipient_list=[order.email],
-        fail_silently=False,
+        to=recipient_list,
     )
+    email.content_subtype = "html"  # important!
+    email.send(fail_silently=False)
 
 
 # thank you page
